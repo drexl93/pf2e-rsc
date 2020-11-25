@@ -1,0 +1,84 @@
+#pf2e-rsc-scripts-content {
+    padding: 5px; 
+    margin: auto; 
+    width: 95%;
+}
+
+#customDC {
+    width: 30px
+}
+
+#successes {
+    width: 30px
+}
+
+#bonuses {
+    width: 30px
+}
+
+#pf2e-rsc-gm_lockset-content2 {
+    text-align: center
+}
+
+.pf2e-rsc-scripts-numbercritsuccess {
+    color: green; 
+    text-decoration: underline
+}
+
+.pf2e-rsc-scripts-numbercritfail {
+    color: red;
+    text-decoration: underline
+}
+
+.pf2e-rsc-scripts-numbersuccess {
+    color: green; 
+}
+
+.pf2e-rsc-scripts-wordfail {
+    font-weight: bold;
+}
+
+.pf2e-rsc-scripts-wordsuccess {
+    color: green; 
+    font-weight: bold
+}
+
+.pf2e-rsc-scripts-wordcritsuccess {
+    color: green; 
+    font-weight: bold; 
+    text-decoration: underline
+}
+
+.pf2e-rsc-scripts-wordcritfail {
+    color: red; 
+    font-weight: bold;
+    text-decoration: underline
+}
+
+.pf2e-rsc-tooltip {
+    display: inline-block;
+    position: relative;
+}
+
+.pf2e-rsc-tooltip .pf2e-rsc-tooltiptext {
+    visibility: hidden;
+    position: absolute;
+    background-image: url("/ui/parchment.jpg");
+    background-repeat: repeat;
+    /* background-color: white; */
+    border-style: solid;
+    border-radius: 6px;
+    text-align: center;
+    padding: 5px 0;
+    z-index: 1;
+    width: 70px;
+    bottom: 100%;
+    /* left: 100%; */
+    margin-left: -35px;
+    color: black;
+    text-decoration: none;
+}
+
+.pf2e-rsc-tooltip:hover .pf2e-rsc-tooltiptext {
+    visibility: visible;
+}

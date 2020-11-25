@@ -1,0 +1,27 @@
+{
+    "name": "pf2e-rsc",
+    "title": "PF2e Repeated Skill Challenge",
+    "description": "Module to help facilitate repeated skill challenges in PF2e",
+    "author": "drexl93",
+    "version": "1.0.0",
+    "minimumCoreVersion": "0.7.0",
+    "compatibleCoreVersion": "0.7.7",
+    "esmodules": [
+        "scripts/init.js",
+        "scripts/scripts.js"
+    ],
+    "styles": [ "./pf2e-rsc.css" ],
+    "packs": [
+	{
+            "name": "pf2e-rsc",
+            "label": "PF2e Repeated Skill Challenge",
+            "path": "packs/pf2e-rsc.db",
+            "module": "pf2e-rsc",
+            "entity": "Macro"
+        }
+    ],
+    "socket": true,
+    "url": "https://github.com/drexl93/pf2e-rsc",
+    "manifest": "https://raw.githubusercontent.com/drexl93/pf2e-rsc/master/module.json",
+    "download": "https://github.com/drexl93/pf2e-rsc/raw/master/pf2e-rsc.zip"
+}
