@@ -22,6 +22,6 @@
     ],
     "socket": true,
     "url": "https://github.com/drexl93/pf2e-rsc",
-    "manifest": "https://raw.githubusercontent.com/drexl93/pf2e-rsc/master/module.json",
-    "download": "https://github.com/drexl93/pf2e-rsc/raw/master/pf2e-rsc.zip"
+    "manifest": "https://raw.githubusercontent.com/drexl93/pf2e-rsc/main/module.json",
+    "download": "https://github.com/drexl93/pf2e-rsc/raw/main/pf2e-rsc.zip"
 }
