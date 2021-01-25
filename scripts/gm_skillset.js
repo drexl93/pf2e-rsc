@@ -42,24 +42,24 @@ let content = "";
 let content2 = "";
 let skill;
 
-content += `<div><label for="preset">Pick a preset: </label>
+content += `<div id="pf2e-rsc-preset"><label for="preset">Pick a preset: </label>
 <select name="preset" id="preset">
   <option value="custom">Custom</option>
-  <option value="poor">Poor</option>
-  <option value="simple">Simple</option>
-  <option value="average">Average</option>
-  <option value="good">Good</option>
-  <option value="superior">Superior</option>
+  <option value="poor">DC 15/2 successes</option>
+  <option value="simple">DC 20/3 successes</option>
+  <option value="average">DC 25/4 successes</option>
+  <option value="good">DC 30/5 successes</option>
+  <option value="superior">DC 40/6 successes</option>
 </select></div>
-<div><label for="skill">Choose a skill: </label>
+<div id="pf2e-rsc-chooseskill"><label for="skill">Choose a skill: </label>
 <select name="skill" id="skill">`
   for (let i = 0; i < Object.keys(skillRefs).length; i++) {
     content += `<option value="${skillRefs[Object.keys(skillRefs)[i]]}">${Object.keys(skillRefs)[i]}</option>`
   }
 content += `</select></div>`
 
-content2 += `<form id="pf2e-rsc-gm_skillset-content2"><p><label for="customDC">DC: </label>
-<input type="text" id="customDC" name="customDC"></p>
+content2 += `<form id="pf2e-rsc-gm_skillset-content2"><p><label for="pf2e-rsc-customDC">DC: </label>
+<input type="text" id="pf2e-rsc-customDC" name="pf2e-rsc-customDC"></p>
 
 <p><label for="successes">Required Successes: </label>
 <input type="text" id="successes" name="successes"></p></form>`
@@ -104,7 +104,7 @@ let custom = new Dialog({
       label: "Select",
       callback: (html) => {
           let neededSuccesses = parseInt(html.find('#successes')[0].value)
-          let DC = parseInt(html.find('#customDC')[0].value)
+          let DC = parseInt(html.find('#pf2e-rsc-customDC')[0].value)
           game.socket.emit('module.pf2e-rsc', {
               operation: 'playerSkillChallenge',
               actor,

@@ -16,127 +16,176 @@
 export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
     let successes = 0;
     let attempts = 0;
-    let critfail = false;
+    let breakout = false;
 
     let results = "";
     let content = "";
+    let rollResArr = []
+    let resultString = "";
+    let outcome;
+    let rollRes;
     
     contentUpdate(0);
     runDialog();
 
+    function arrayAdd(outcome) {
+        let color;
+        switch (outcome) {
+            case 'critsuccess': successes++;
+            case 'success': 
+                successes++
+                color = 'green'
+                break;
+            case 'fail': 
+                color = 'black';
+                break;
+            case 'critfail': 
+                color = 'red';
+                break;
+        }
+        rollResArr.push(` 
+        <div class="pf2e-rsc-tooltip">
+            <span class="pf2e-rsc-scripts-number${outcome}">
+                    <span class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}
+                    </span>
+                    ${rollRes._total}</span>.
+                </div>`)
+        console.log(rollResArr)
+    }
+
+    async function resultsAdd(outcome) {
+        let color;
+        switch (outcome) {
+            case 'critsuccess':
+                color = 'green'
+                results += `<div><span class="pf2e-rsc-scripts-wordcritsuccess">Critical Success!</span><br/>`
+                successes = successes + 2
+                break;
+            case 'success':
+                color = 'green'
+                results += `<div><span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/>`
+                successes++
+                break;
+            case 'fail':
+                color = 'black'
+                results += `<div><span class="pf2e-rsc-scripts-wordfail">Failure.</span><br/>`
+                break;
+            case 'critfail':
+                color = 'red'
+                results += `<div><span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span><br/>`
+                break;
+        }
+        results += ` Your result was
+                <div class="pf2e-rsc-tooltip">
+                    <span class="pf2e-rsc-scripts-number${outcome}">
+                        <span class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}
+                        </span>
+                        ${rollRes._total}</span>.
+                </div>`
+    }
+
     // if autopick is checked, keep going until success or critical failure
     async function fastMode(targetSuccesses, targetDC, actor, mod, bonuses) {
-        let rollResArr = []
-        while (successes < targetSuccesses) {
+        do {
             attempts++
-            let rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
-            let resultString = "";
+            rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
+            resultString = ""; // this will look like "13+4+0" etc
             for (let i=0; i<rollRes.results.length ; i++) {
                 resultString += `${rollRes.results[i]}`
             }
-            if (rollRes._total >= targetDC + 10) {
-                successes = successes + 2
-                rollResArr.push(` 
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-numbercritsuccess">${rollRes._total}
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: green">${resultString}
-                        </span>
-                    </span>
-                </div>`)
-            } else if (rollRes._total >= targetDC) {
-                successes++
-                rollResArr.push(` 
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-numbersuccess">${rollRes._total}
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: green">${resultString}
-                        </span>
-                    </span>
-                </div>`)
-            } else if (rollRes._total <= targetDC - 10) {
-                results += `<span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!
-                </span><br/>
-                 The tools break.<br/>`
-                rollResArr.push(`
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-numbercritfail">${rollRes._total}
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: red">${resultString}
-                        </span>
-                    </span>
-                </div>`)
-                break;
-            } else {
-                rollResArr.push(` 
-                <div class="pf2e-rsc-tooltip">
-                    ${rollRes._total}
-                    <span class="pf2e-rsc-tooltiptext" style="border-color: black">${resultString}
-                    </span>
-                </div>`
-                )
+            if (rollRes._total >= targetDC + 10) { // if the roll result is a critical success
+                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a success
+                    outcome = 'success'
+                } else {
+                    outcome = 'critsuccess'
+                }
+            } else if (rollRes._total >= targetDC) { // if the roll result is a success
+                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a failure
+                    outcome = 'fail'
+                } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a critical success
+                    outcome = 'critsuccess'
+                } else {
+                    outcome = 'success'
+                }
+            } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
+                if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
+                    outcome = 'fail'
+                    breakout = true;
+                } else {
+                    outcome = 'critfail'
+                }
+            } else { // if the roll result is a failure
+                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a critical failure
+                    outcome = 'critfail'
+                } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a success
+                    outcome = 'success'
+                } else {
+                    outcome = 'fail'
+                }
             }
+            arrayAdd(outcome)
         }
+        while (successes < targetSuccesses && !breakout)
+
         if (successes >= targetSuccesses) results += `<span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/> The challenge is successful!<br/>`
-        if (rollResArr.length > 1) results += ` Your roll results were: ${rollResArr.toString()}.`
-        else results += ` Your roll result was: ${rollResArr.toString()}.`
-        results += ` The attempt took ${attempts*6} seconds in total.`
+        else results += `<span class="pf2e-rsc-scripts-wordfail">Impossible!</span><br/> The challenge is impossible!<br/>`
+        if (rollResArr.length > 1) {
+            results += ` Your roll results were: ${rollResArr.toString()}.`
+            results += ` The attempt took ${attempts} rounds in total.`
+        }
+        else {
+            results += ` Your roll result was: ${rollResArr.toString()}.`
+            results += ` The attempt took ${attempts} round.`
+        }
+        
         generateChat(actor, results)
     }
 
-    // if autopick is not checked, go one roll at a time
+    // if autoroll is not checked, go one roll at a time
     async function normalMode(targetSuccesses, targetDC, actor, mod, bonuses) {
         attempts++
-        let rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
-        let resultString = "";
+        rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
+        resultString = ``; // this will look like "13+4+0" etc
         for (let i=0; i<rollRes.results.length ; i++) {
             resultString += `${rollRes.results[i]}`
         }
-        if (rollRes._total >= targetDC) {
-            successes++
-            if (rollRes._total >= targetDC + 10) {
-                successes++
-                results += `<div><span class="pf2e-rsc-scripts-wordcritsuccess">Critical Success!</span><br/>`
-                results += ` Your result was
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-numbercritsuccess">${rollRes._total}.
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: green">${resultString}
-                        </span>
-                    </span>
-                </div>`
-            } else { 
-                results += `<div><span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/>`
-                results += ` Your result was
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-numbersuccess">${rollRes._total}.
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: green">${resultString}
-                        </span>
-                    </span>
-                </div>`
+        if (rollRes._total >= targetDC + 10) { // if the roll result is a critical success
+            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a success
+                resultsAdd('success')
+            } else {
+                resultsAdd('critsuccess')
             }
-        } else if (rollRes._total < targetDC && rollRes._total > targetDC - 10) {
-            results += `<div><span class="pf2e-rsc-scripts-wordfail">Failure.</span><br/>`
-            results += ` Your result was
-            <div class="pf2e-rsc-tooltip">
-                ${rollRes._total}.
-                <span class="pf2e-rsc-tooltiptext" style="border-color: black">${resultString}
-                </span>
-            </div>`
-        } else {
-            results += `<div><span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span><br/>`
-            results += ` Your result was
-            <div class="pf2e-rsc-tooltip">
-                <span class="pf2e-rsc-scripts-numbercritfail">${rollRes._total}.
-                    <span class="pf2e-rsc-tooltiptext" style="border-color: red">${resultString}
-                    </span>
-                </span>
-            </div>`
-            critfail = true;
+        } else if (rollRes._total >= targetDC) { // if the roll result is a success
+            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a failure
+                resultsAdd('fail')
+            } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a critical success
+                resultsAdd('critsuccess')
+            } else {
+                resultsAdd('success')
+            }
+        } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
+            if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
+                resultsAdd('fail')
+            } else {
+                resultsAdd('critfail')
+            }
+        } else { // if the roll result is a failure
+            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a critical failure
+                resultsAdd('critfail')
+            } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a success
+                resultsAdd('success')
+            } else {
+                resultsAdd('fail')
+            }
         }
-        if (successes < targetSuccesses && !critfail) {
-            results += ` You have attempted this skill challenge for ${attempts*6} seconds.</div>`
+        
+        if (successes < targetSuccesses && !breakout) {
+            results += ` You have attempted this skill challenge for ${attempts} rounds.</div>`
             contentUpdate(bonuses);
             runDialog();
         } else {
             if (successes >= targetSuccesses) results += ` The skill check is successful!`
-            results += ` Your attempt lasted ${attempts*6} seconds.</div>`
+            results += ` Your attempt lasted ${attempts} rounds.</div>`
         }
         generateChat(actor, results)
         results = ``

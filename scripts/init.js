@@ -1,4 +1,4 @@
-// Set up socket listener to listen for gm_lockset macro
+// Set up socket listener to listen for gm_skillset macro
 
 Hooks.once("ready", () => {
     game.socket.on('module.pf2e-rsc', (data) => {
@@ -8,6 +8,5 @@ Hooks.once("ready", () => {
             }
         }
     });
-    console.log("READY!")
 })
 import { skillChallenge } from './scripts.js';

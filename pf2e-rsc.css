@@ -4,15 +4,31 @@
     width: 95%;
 }
 
-#customDC {
+#pf2e-rsc-chooseskill {
+    padding: 8px 0px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 60%;
+}
+
+#pf2e-rsc-preset {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+    text-align: center;
+}
+
+#pf2e-rsc-customDC {
     width: 30px
 }
 
-#successes {
+#pf2e-rsc-successes {
     width: 30px
 }
 
-#bonuses {
+#pf2e-rsc-bonuses {
     width: 30px
 }
 
@@ -32,6 +48,10 @@
 
 .pf2e-rsc-scripts-numbersuccess {
     color: green; 
+}
+
+.pf2e-rsc-scripts-numberfail {
+    color: black; 
 }
 
 .pf2e-rsc-scripts-wordfail {
