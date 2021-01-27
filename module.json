@@ -3,7 +3,7 @@
     "title": "PF2e Repeated Skill Challenge",
     "description": "Module to help facilitate repeated skill challenges in PF2e",
     "author": "drexl93",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "minimumCoreVersion": "0.7.0",
     "compatibleCoreVersion": "0.7.7",
     "esmodules": [

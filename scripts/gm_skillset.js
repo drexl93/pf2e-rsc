@@ -41,6 +41,8 @@ let skillRefs = {
 let content = "";
 let content2 = "";
 let skill;
+let abort;
+let skillLabel;
 
 content += `<div id="pf2e-rsc-preset"><label for="preset">Pick a preset: </label>
 <select name="preset" id="preset">
@@ -50,13 +52,19 @@ content += `<div id="pf2e-rsc-preset"><label for="preset">Pick a preset: </label
   <option value="average">DC 25/4 successes</option>
   <option value="good">DC 30/5 successes</option>
   <option value="superior">DC 40/6 successes</option>
-</select></div>
-<div id="pf2e-rsc-chooseskill"><label for="skill">Choose a skill: </label>
+</select></div>`
+
+content += `<div id="pf2e-rsc-chooseskill"><label for="skill">Choose a skill: </label>
 <select name="skill" id="skill">`
   for (let i = 0; i < Object.keys(skillRefs).length; i++) {
     content += `<option value="${skillRefs[Object.keys(skillRefs)[i]]}">${Object.keys(skillRefs)[i]}</option>`
   }
 content += `</select></div>`
+
+content += `<div id="pf2e-rsc-stopcritfail">Abort on Critical Failure?
+<div><input type="radio" id="yes" name="critfail" value="yes"><label for="yes">Yes</label>
+<input type="radio" id="no" name="critfail" value="no" checked><label for="no">No</label>
+</div></div>`
 
 content2 += `<form id="pf2e-rsc-gm_skillset-content2"><p><label for="pf2e-rsc-customDC">DC: </label>
 <input type="text" id="pf2e-rsc-customDC" name="pf2e-rsc-customDC"></p>
@@ -73,7 +81,9 @@ let dialog = new Dialog({
       label: "Select",
       callback: (html) => {
         skill = (html.find('#skill')[0].value)
+        skillLabel = html.find('#skill')[0].selectedOptions[0].label
         let preset = (html.find('#preset')[0].value)
+        abort = html.find(`#yes`)[0].checked
           if (preset === "custom") {
               custom.options.width = 125
               custom.position.width = 125
@@ -84,7 +94,9 @@ let dialog = new Dialog({
                   actor,
                   neededSuccesses: presets[preset].successes,
                   DC: presets[preset].DC, 
-                  mod: actor.data.data.skills[skill].value
+                  mod: actor.data.data.skills[skill].value,
+                  skillLabel,
+                  abort
               });
           }
       }
@@ -110,7 +122,9 @@ let custom = new Dialog({
               actor,
               neededSuccesses,
               DC,
-              mod: actor.data.data.skills[skill].value
+              mod: actor.data.data.skills[skill].value,
+              skillLabel,
+              abort
           });
       }
     },

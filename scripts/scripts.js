@@ -13,10 +13,11 @@
 //
 // You can hover over the result rolled to see what the modifiers were.
 
-export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
+export function skillChallenge(targetSuccesses, targetDC, actor, mod, skillLabel, abort) {
     let successes = 0;
     let attempts = 0;
-    let breakout = false;
+    let impossible = false;
+    let critfail = false;
 
     let results = "";
     let content = "";
@@ -43,14 +44,10 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
                 color = 'red';
                 break;
         }
-        rollResArr.push(` 
-        <div class="pf2e-rsc-tooltip">
-            <span class="pf2e-rsc-scripts-number${outcome}">
-                    <span class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}
-                    </span>
-                    ${rollRes._total}</span>.
-                </div>`)
-        console.log(rollResArr)
+        rollResArr.push( 
+        ` <div class="pf2e-rsc-tooltip"><span
+            class="pf2e-rsc-scripts-number${outcome}"><span
+                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes._total}</span></div>`)
     }
 
     async function resultsAdd(outcome) {
@@ -75,17 +72,14 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
                 results += `<div><span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span><br/>`
                 break;
         }
-        results += ` Your result was
-                <div class="pf2e-rsc-tooltip">
-                    <span class="pf2e-rsc-scripts-number${outcome}">
-                        <span class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}
-                        </span>
-                        ${rollRes._total}</span>.
-                </div>`
+        results += ` Your result was <div
+                        class="pf2e-rsc-tooltip"><span
+                            class="pf2e-rsc-scripts-number${outcome}"><span
+                                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes._total}</span>.</div>`
     }
 
     // if autopick is checked, keep going until success or critical failure
-    async function fastMode(targetSuccesses, targetDC, actor, mod, bonuses) {
+    async function fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort) {
         do {
             attempts++
             rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
@@ -110,7 +104,7 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
             } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
                 if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
                     outcome = 'fail'
-                    breakout = true;
+                    impossible = true;
                 } else {
                     outcome = 'critfail'
                 }
@@ -124,11 +118,19 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
                 }
             }
             arrayAdd(outcome)
+            if (outcome === 'critfail' && abort) critfail = true;
         }
-        while (successes < targetSuccesses && !breakout)
+        while (successes < targetSuccesses && !impossible && !critfail)
 
-        if (successes >= targetSuccesses) results += `<span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/> The challenge is successful!<br/>`
-        else results += `<span class="pf2e-rsc-scripts-wordfail">Impossible!</span><br/> The challenge is impossible!<br/>`
+        
+        if (critfail) {
+            results += `<span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span></br>`
+            results += `The ${skillLabel} skill challenge is unsuccessful!`
+        }
+
+        if (impossible) results += `<span class="pf2e-rsc-scripts-wordfail">Impossible!</span><br/> The ${skillLabel} challenge is impossible!<br/>`
+        if (successes >= targetSuccesses) results += `<span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/> The ${skillLabel} challenge is successful!<br/>`
+        
         if (rollResArr.length > 1) {
             results += ` Your roll results were: ${rollResArr.toString()}.`
             results += ` The attempt took ${attempts} rounds in total.`
@@ -142,7 +144,7 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
     }
 
     // if autoroll is not checked, go one roll at a time
-    async function normalMode(targetSuccesses, targetDC, actor, mod, bonuses) {
+    async function normalMode(targetSuccesses, targetDC, actor, mod, bonuses, abort) {
         attempts++
         rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
         resultString = ``; // this will look like "13+4+0" etc
@@ -166,12 +168,15 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
         } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
             if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
                 resultsAdd('fail')
+                impossible = true;
             } else {
                 resultsAdd('critfail')
+                critfail = true;
             }
         } else { // if the roll result is a failure
             if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a critical failure
                 resultsAdd('critfail')
+                critfail = true;
             } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a success
                 resultsAdd('success')
             } else {
@@ -179,13 +184,18 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
             }
         }
         
-        if (successes < targetSuccesses && !breakout) {
-            results += ` You have attempted this skill challenge for ${attempts} rounds.</div>`
-            contentUpdate(bonuses);
-            runDialog();
-        } else {
-            if (successes >= targetSuccesses) results += ` The skill check is successful!`
+        if (abort && critfail) {
+            results += `The ${skillLabel} skill challenge is unsuccessful!`
             results += ` Your attempt lasted ${attempts} rounds.</div>`
+        } else {
+            if (successes < targetSuccesses && !impossible) {
+                results += ` You have attempted this ${skillLabel} skill challenge for ${attempts} rounds.</div>`
+                contentUpdate(bonuses);
+                runDialog();
+            } else {
+                if (successes >= targetSuccesses) results += ` The ${skillLabel} skill check is successful!`
+                results += ` Your attempt lasted ${attempts} rounds.</div>`
+            }
         }
         generateChat(actor, results)
         results = ``
@@ -215,9 +225,9 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod) {
                 callback: (html) => {
                     let bonuses = parseInt(html.find("#bonuses")[0].value)
                     if (html.find("#fastmode")[0].checked) {
-                        fastMode(targetSuccesses, targetDC, actor, mod, bonuses)
+                        fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort)
                     } else {
-                        normalMode(targetSuccesses, targetDC, actor, mod, bonuses)
+                        normalMode(targetSuccesses, targetDC, actor, mod, bonuses, abort)
                     }   
                 }
               },
