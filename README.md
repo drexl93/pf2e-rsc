@@ -1,15 +1,16 @@
-# PF2e Lockpicking
-This is a simple little module that supports the automation of Pathfinder 2e's "multiple successes" rules on lockpicking.
+# PF2e Repeated Skill Challenges
+This is a simple little module that supports the automation of Pathfinder 2e's "multiple successes" rules across skills.
 
 ## Installation:
-Copy the following link into your Manifest URL bar in the Module Installation window of Foundry VTT: https://raw.githubusercontent.com/drexl93/pf2e-lockpicking/master/module.json
+Copy the following link into your Manifest URL bar in the Module Installation window of Foundry VTT: https://raw.githubusercontent.com/drexl93/pf2e-rsc/main/module.json
 
 ## Usage:
-1. GM selects the token of the actor attempting the lockpicking.
-2. GM uses the supplied macro (in the PF2e Lockpicking Compendium) to choose a type of lock.
+1. GM selects the token of the actor attempting the skill challenge.
+2. GM uses the supplied macro (in the PF2e Repeated Skill Challenge Compendium) to choose the skill to be used and the DC/number of successes.
     - Selecting 'Custom' allows them to input their own amount of successes required as well as the DC.
-3. Once the type of lock is selected, the owner(s) of the actor selected will get a pop-up asking them if they have any bonuses to add, and prompting them to roll.
-    - The player may wish to roll each attempt individually, or they may wish to select the 'Autopick' option to keep trying until they either succeed or critically fail.
+3. The GM selects whether they would like a Critical Failure on a check to immediately end the skill challenge, or keep going until enough successes are achieved.
+3. Once the GM has set up the skill challenge and clicked 'select', the owner(s) of the actor selected will get a pop-up asking them if they have any bonuses to add, and prompting them to roll.
+    - The player may wish to roll each attempt individually, or they may wish to select the 'Autoroll' option to keep trying until they either succeed or critically fail.
     - Hovering over the number of the result in the chat shows a breakdown of the roll.
 
 ## Demonstration:
