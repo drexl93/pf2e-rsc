@@ -16,11 +16,11 @@ Copy the following link into your Manifest URL bar in the Module Installation wi
 ## Demonstration:
 GM side:
 
-![Lockpick Send](https://media.giphy.com/media/TvDj5pKSatj6G7wbIr/giphy.gif)
+![Skill Challenge GM Side](https://media.giphy.com/media/QKENtKAk3gGj6T9fMN/giphy.gif)
 
 Player side:
 
-![Lockpick Receive](https://media.giphy.com/media/ibrdD57zManKaXl1uy/giphy.gif)
+![Skill Challenge Player Side](https://media.giphy.com/media/2GQnk3CwWc2KZsdXcH/giphy.gif)
 
 
 ## Endnotes:
