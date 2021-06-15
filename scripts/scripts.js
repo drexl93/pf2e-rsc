@@ -47,7 +47,7 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod, skillLabel
         rollResArr.push( 
         ` <div class="pf2e-rsc-tooltip"><span
             class="pf2e-rsc-scripts-number${outcome}"><span
-                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes._total}</span></div>`)
+                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span></div>`)
     }
 
     async function resultsAdd(outcome) {
@@ -75,43 +75,41 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod, skillLabel
         results += ` Your result was <div
                         class="pf2e-rsc-tooltip"><span
                             class="pf2e-rsc-scripts-number${outcome}"><span
-                                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes._total}</span>.</div>`
+                                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span>.</div>`
     }
 
     // if autopick is checked, keep going until success or critical failure
     async function fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort) {
         do {
             attempts++
-            rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
-            resultString = ""; // this will look like "13+4+0" etc
-            for (let i=0; i<rollRes.results.length ; i++) {
-                resultString += `${rollRes.results[i]}`
-            }
-            if (rollRes._total >= targetDC + 10) { // if the roll result is a critical success
-                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a success
+            if (bonuses) rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
+            else rollRes = new Roll("1d20 + @mod", {mod} ).roll()
+            resultString = `${rollRes.result}`; // this will look like "13+4+0" etc
+            if (rollRes.total >= targetDC + 10) { // if the roll result is a critical success
+                if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a success
                     outcome = 'success'
                 } else {
                     outcome = 'critsuccess'
                 }
-            } else if (rollRes._total >= targetDC) { // if the roll result is a success
-                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a failure
+            } else if (rollRes.total >= targetDC) { // if the roll result is a success
+                if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a failure
                     outcome = 'fail'
-                } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a critical success
+                } else if (rollRes.dice[0].total === 20) { // but if the d20 roll was a 20, make it a critical success
                     outcome = 'critsuccess'
                 } else {
                     outcome = 'success'
                 }
-            } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
-                if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
+            } else if (rollRes.total <= targetDC - 10) { // if the roll result is a critical failure
+                if (rollRes.dice[0].total === 20) { // but the d20 roll was a 20, make it a regular failure
                     outcome = 'fail'
                     impossible = true;
                 } else {
                     outcome = 'critfail'
                 }
             } else { // if the roll result is a failure
-                if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a critical failure
+                if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a critical failure
                     outcome = 'critfail'
-                } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a success
+                } else if (rollRes.dice[0].total === 20) { // but if the d20 roll was a 20, make it a success
                     outcome = 'success'
                 } else {
                     outcome = 'fail'
@@ -146,27 +144,25 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod, skillLabel
     // if autoroll is not checked, go one roll at a time
     async function normalMode(targetSuccesses, targetDC, actor, mod, bonuses, abort) {
         attempts++
-        rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
-        resultString = ``; // this will look like "13+4+0" etc
-        for (let i=0; i<rollRes.results.length ; i++) {
-            resultString += `${rollRes.results[i]}`
-        }
-        if (rollRes._total >= targetDC + 10) { // if the roll result is a critical success
-            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a success
+        if (bonuses) rollRes = new Roll("1d20 + @mod + @bonuses", {mod, bonuses} ).roll()
+        else rollRes = new Roll("1d20 + @mod", {mod} ).roll()
+        resultString = `${rollRes.result}`; // this will look like "13+4+0" etc
+        if (rollRes.total >= targetDC + 10) { // if the roll result is a critical success
+            if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a success
                 resultsAdd('success')
             } else {
                 resultsAdd('critsuccess')
             }
-        } else if (rollRes._total >= targetDC) { // if the roll result is a success
-            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a failure
+        } else if (rollRes.total >= targetDC) { // if the roll result is a success
+            if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a failure
                 resultsAdd('fail')
-            } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a critical success
+            } else if (rollRes.dice[0].total === 20) { // but if the d20 roll was a 20, make it a critical success
                 resultsAdd('critsuccess')
             } else {
                 resultsAdd('success')
             }
-        } else if (rollRes._total <= targetDC - 10) { // if the roll result is a critical failure
-            if (rollRes.results[0] === 20) { // but the d20 roll was a 20, make it a regular failure
+        } else if (rollRes.total <= targetDC - 10) { // if the roll result is a critical failure
+            if (rollRes.dice[0].total === 20) { // but the d20 roll was a 20, make it a regular failure
                 resultsAdd('fail')
                 impossible = true;
             } else {
@@ -174,10 +170,10 @@ export function skillChallenge(targetSuccesses, targetDC, actor, mod, skillLabel
                 critfail = true;
             }
         } else { // if the roll result is a failure
-            if (rollRes.results[0] === 1) { // but the d20 roll was a 1, reduce it to a critical failure
+            if (rollRes.dice[0].total === 1) { // but the d20 roll was a 1, reduce it to a critical failure
                 resultsAdd('critfail')
                 critfail = true;
-            } else if (rollRes.results[0] === 20) { // but if the d20 roll was a 20, make it a success
+            } else if (rollRes.dice[0].total === 20) { // but if the d20 roll was a 20, make it a success
                 resultsAdd('success')
             } else {
                 resultsAdd('fail')
