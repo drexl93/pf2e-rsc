@@ -4,9 +4,6 @@ This is a simple little module that supports the automation of Pathfinder 2e's "
 ## Installation:
 Copy the following link into your Manifest URL bar in the Module Installation window of Foundry VTT: https://raw.githubusercontent.com/drexl93/pf2e-rsc/main/module.json
 
-MARKS HACKS:
-all credit to original author as well as Tik and webster who helped me with the async rolling.  I didn't update the compendiums, so you'll have to manually update the gm macro with the contents of gm_skillset.js and replace the files in the modules\pf2e-rsc\scripts directory if you're using the original repo.
-
 ## Usage:
 1. GM selects the token of the actor attempting the skill challenge.
 2. GM uses the supplied macro (in the PF2e Repeated Skill Challenge Compendium) to choose the skill to be used and the DC/number of successes.
