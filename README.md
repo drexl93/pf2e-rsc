@@ -2,7 +2,7 @@
 This is a simple little module that supports the automation of Pathfinder 2e's "multiple successes" rules across skills.
 
 ## Installation:
-Copy the following link into your Manifest URL bar in the Module Installation window of Foundry VTT: https://raw.githubusercontent.com/drexl93/pf2e-rsc/main/module.json
+Copy the following link into your Manifest URL bar in the Module Installation window of Foundry VTT: https://github.com/drexl93/pf2e-rsc/releases/latest/download/module.json
 
 ## Usage:
 1. GM selects the token of the actor attempting the skill challenge.
