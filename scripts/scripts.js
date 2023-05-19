@@ -16,185 +16,159 @@
 export function skillChallenge(
   targetSuccesses,
   targetDC,
-  actor,
-  mod,
-  skillLabel,
+  chosenSkill,
   abort,
-  tokenID
-) {
-  const skillRefs = {
-    Thievery: "thi",
-    Acrobatics: "acr",
-    Arcana: "arc",
-    Athletics: "ath",
-    Crafting: "cra",
-    Deception: "dec",
-    Diplomacy: "dip",
-    Intimidation: "itm",
-    Medicine: "med",
-    Nature: "nat",
-    Occultism: "occ",
-    Performance: "prf",
-    Religion: "rel",
-    Society: "soc",
-    Stealth: "ste",
-    Survival: "sur",
-  };
+  actorID,
+  mod,
+){
 
-  let skillKey = skillRefs[skillLabel];
-  console.log(targetSuccesses);
-  console.log("targetDC " + targetDC);
-  let token = canvas.tokens.get(tokenID);
+  console.log('targetSuccesses', targetSuccesses, 'targetDC', targetDC, 'chosenSkill', chosenSkill, 'abort', abort, 'actorID', actorID, 'mod', mod)
+  // console.log('the real samara', game.actors.get(actor._id))
 
-  let successes = 0;
-  let attempts = 0;
-  let impossible = false;
-  let critfail = false;
+  let successes = 0
+  let attempts = 0
+  let impossible = false
+  let critfail = false
+  let actor = game.actors.get(actorID)
+  let skillLabel = actor.skills[chosenSkill].label
 
-  let results = "";
-  let content = "";
-  let rollResArr = [];
-  let resultString = "";
-  let outcome;
-  let rollRes;
+  let results = ''
+  let content = ''
+  let rollResArr = []
+  let resultString = ''
+  let outcome
+  let rollRes
   // let bonuses = 0;
 
-  contentUpdate(0);
-  runDialog();
+  contentUpdate(0)
+  runDialog()
 
   function arrayAdd(outcome) {
-    let color;
+    let color
     switch (outcome) {
-      case "critsuccess":
-        successes++;
-      case "success":
-        successes++;
-        color = "green";
-        break;
-      case "fail":
-        color = "black";
-        break;
-      case "critfail":
-        color = "red";
-        break;
+      case 'critsuccess':
+        successes++
+      case 'success':
+        successes++
+        color = 'green'
+        break
+      case 'fail':
+        color = 'black'
+        break
+      case 'critfail':
+        color = 'red'
+        break
     }
     rollResArr.push(
-      ` <div class="pf2e-rsc-tooltip"><span
-            class="pf2e-rsc-scripts-number${outcome}"><span
-                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span></div>`
-    );
+        `<div class="pf2e-rsc-tooltip">
+          <span class="pf2e-rsc-scripts-number${outcome}">
+            <span class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span>
+        </div>`,
+    )
   }
 
   async function resultsAdd(outcome) {
-    let color;
+    let color
     switch (outcome) {
-      case "critsuccess":
-        color = "green";
-        results += `<div><span class="pf2e-rsc-scripts-wordcritsuccess">Critical Success!</span><br/>`;
-        successes = successes + 2;
-        break;
-      case "success":
-        color = "green";
-        results += `<div><span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/>`;
-        successes++;
-        break;
-      case "fail":
-        color = "black";
-        results += `<div><span class="pf2e-rsc-scripts-wordfail">Failure.</span><br/>`;
-        break;
-      case "critfail":
-        color = "red";
-        results += `<div><span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span><br/>`;
-        break;
+      case 'critsuccess':
+        color = 'green'
+        results += `<div><span class="pf2e-rsc-scripts-wordcritsuccess">Critical Success!</span><br/>`
+        successes = successes + 2
+        break
+      case 'success':
+        color = 'green'
+        results += `<div><span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/>`
+        successes++
+        break
+      case 'fail':
+        color = 'black'
+        results += `<div><span class="pf2e-rsc-scripts-wordfail">Failure.</span><br/>`
+        break
+      case 'critfail':
+        color = 'red'
+        results += `<div><span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span><br/>`
+        break
     }
     results += ` Your result was <div
                         class="pf2e-rsc-tooltip"><span
                             class="pf2e-rsc-scripts-number${outcome}"><span
-                                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span>.</div>`;
+                                class="pf2e-rsc-tooltiptext" style="border-color: ${color}">${resultString}</span>${rollRes.total}</span>.</div>`
   }
 
-  // if autopick is checked, keep going until success or critical failure
-  async function fastMode(
-    targetSuccesses,
-    targetDC,
-    actor,
-    mod,
-    bonuses,
-    abort
-  ) {
+  // if autoroll is checked, keep going until success or critical failure
+  async function fastMode(targetSuccesses, targetDC, bonuses, abort) {
     do {
-      attempts++;
+      attempts++
       if (bonuses) {
-        rollRes = await rollSkillCheckBonus(skillKey);
+        rollRes = await rollSkillCheckBonus(chosenSkill)
       }
       //TODO add optional bonus from dialog
       else {
-        rollRes = await rollSkillCheck(skillKey);
+        rollRes = await rollSkillCheck(chosenSkill)
       }
-      resultString = `${rollRes.result}`; // this will look like "13+4+0" etc
+      resultString = `${rollRes.result}` // this will look like "13+4+0" etc
       if (rollRes.total >= targetDC + 10) {
         // if the roll result is a critical success
         if (rollRes.dice[0].total === 1) {
           // but the d20 roll was a 1, reduce it to a success
-          outcome = "success";
+          outcome = 'success'
         } else {
-          outcome = "critsuccess";
+          outcome = 'critsuccess'
         }
       } else if (rollRes.total >= targetDC) {
         // if the roll result is a success
         if (rollRes.dice[0].total === 1) {
           // but the d20 roll was a 1, reduce it to a failure
-          outcome = "fail";
+          outcome = 'fail'
         } else if (rollRes.dice[0].total === 20) {
           // but if the d20 roll was a 20, make it a critical success
-          outcome = "critsuccess";
+          outcome = 'critsuccess'
         } else {
-          outcome = "success";
+          outcome = 'success'
         }
       } else if (rollRes.total <= targetDC - 10) {
         // if the roll result is a critical failure
         if (rollRes.dice[0].total === 20) {
           // but the d20 roll was a 20, make it a regular failure
-          outcome = "fail";
-          impossible = true;
+          outcome = 'fail'
+          impossible = true
         } else {
-          outcome = "critfail";
+          outcome = 'critfail'
         }
       } else {
         // if the roll result is a failure
         if (rollRes.dice[0].total === 1) {
           // but the d20 roll was a 1, reduce it to a critical failure
-          outcome = "critfail";
+          outcome = 'critfail'
         } else if (rollRes.dice[0].total === 20) {
           // but if the d20 roll was a 20, make it a success
-          outcome = "success";
+          outcome = 'success'
         } else {
-          outcome = "fail";
+          outcome = 'fail'
         }
       }
-      arrayAdd(outcome);
-      if (outcome === "critfail" && abort) critfail = true;
-    } while (successes < targetSuccesses && !impossible && !critfail);
+      arrayAdd(outcome)
+      if (outcome === 'critfail' && abort) critfail = true
+    } while (successes < targetSuccesses && !impossible && !critfail)
 
     if (critfail) {
-      results += `<span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span></br>`;
-      results += `The ${skillLabel} skill challenge is unsuccessful!`;
+      results += `<span class="pf2e-rsc-scripts-wordcritfail">Critical Failure!</span></br>`
+      results += `The ${skillLabel} skill challenge is unsuccessful!`
     }
 
     if (impossible)
-      results += `<span class="pf2e-rsc-scripts-wordfail">Impossible!</span><br/> The ${skillLabel} challenge is impossible!<br/>`;
+      results += `<span class="pf2e-rsc-scripts-wordfail">Impossible!</span><br/> The ${skillLabel} challenge is impossible!<br/>`
     if (successes >= targetSuccesses)
-      results += `<span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/> The ${skillLabel} challenge is successful!<br/>`;
+      results += `<span class="pf2e-rsc-scripts-wordsuccess">Success!</span><br/> The ${skillLabel} challenge is successful!<br/>`
 
     if (rollResArr.length > 1) {
-      results += ` Your roll results were: ${rollResArr.toString()}.`;
-      results += ` The attempt took ${attempts} rounds in total.`;
+      results += ` Your roll results were: ${rollResArr.join(', ')}.`
+      results += ` The attempt took ${attempts} rounds in total.`
     } else {
-      results += ` Your roll result was: ${rollResArr.toString()}.`;
-      results += ` The attempt took ${attempts} round.`;
+      results += ` Your roll result was: ${rollResArr.toString()}.`
+      results += ` The attempt took ${attempts} round.`
     }
-
-    generateChat(actor, results);
+    generateChat(actor, results)
   }
 
   // if autoroll is not checked, go one roll at a time
@@ -204,178 +178,181 @@ export function skillChallenge(
     actor,
     mod,
     bonuses,
-    abort
+    abort,
   ) {
-    attempts++;
+    attempts++
     if (bonuses) {
-      rollRes = await rollSkillCheckBonus(skillKey);
+      rollRes = await rollSkillCheckBonus(chosenSkill)
     } else {
-      rollRes = await rollSkillCheck(skillKey);
+      rollRes = await rollSkillCheck(chosenSkill)
     }
-    resultString = `${rollRes.result}`; // this will look like "13+4+0" etc
+    resultString = `${rollRes.result}` // this will look like "13+4+0" etc
     if (rollRes.total >= targetDC + 10) {
       // if the roll result is a critical success
       if (rollRes.dice[0].total === 1) {
         // but the d20 roll was a 1, reduce it to a success
-        resultsAdd("success");
+        resultsAdd('success')
       } else {
-        resultsAdd("critsuccess");
+        resultsAdd('critsuccess')
       }
     } else if (rollRes.total >= targetDC) {
       // if the roll result is a success
       if (rollRes.dice[0].total === 1) {
         // but the d20 roll was a 1, reduce it to a failure
-        resultsAdd("fail");
+        resultsAdd('fail')
       } else if (rollRes.dice[0].total === 20) {
         // but if the d20 roll was a 20, make it a critical success
-        resultsAdd("critsuccess");
+        resultsAdd('critsuccess')
       } else {
-        resultsAdd("success");
+        resultsAdd('success')
       }
     } else if (rollRes.total <= targetDC - 10) {
       // if the roll result is a critical failure
       if (rollRes.dice[0].total === 20) {
         // but the d20 roll was a 20, make it a regular failure
-        resultsAdd("fail");
-        impossible = true;
+        resultsAdd('fail')
+        impossible = true
       } else {
-        resultsAdd("critfail");
-        critfail = true;
+        resultsAdd('critfail')
+        critfail = true
       }
     } else {
       // if the roll result is a failure
       if (rollRes.dice[0].total === 1) {
         // but the d20 roll was a 1, reduce it to a critical failure
-        resultsAdd("critfail");
-        critfail = true;
+        resultsAdd('critfail')
+        critfail = true
       } else if (rollRes.dice[0].total === 20) {
         // but if the d20 roll was a 20, make it a success
-        resultsAdd("success");
+        resultsAdd('success')
       } else {
-        resultsAdd("fail");
+        resultsAdd('fail')
       }
     }
 
     if (abort && critfail) {
-      results += `The ${skillLabel} skill challenge is unsuccessful!`;
-      results += ` Your attempt lasted ${attempts} rounds.</div>`;
+      results += `The ${skillLabel} skill challenge is unsuccessful!`
+      results += ` Your attempt lasted ${attempts} rounds.</div>`
     } else {
       if (successes < targetSuccesses && !impossible) {
-        results += ` You have attempted this ${skillLabel} skill challenge for ${attempts} rounds.</div>`;
-        contentUpdate(bonuses);
-        runDialog();
+        results += ` You have attempted this ${skillLabel} skill challenge for ${attempts} rounds.</div>`
+        contentUpdate(bonuses)
+        runDialog()
       } else {
         if (successes >= targetSuccesses)
-          results += ` The ${skillLabel} skill check is successful!`;
-        results += ` Your attempt lasted ${attempts} rounds.</div>`;
+          results += ` The ${skillLabel} skill check is successful!`
+        results += ` Your attempt lasted ${attempts} rounds.</div>`
       }
     }
-    generateChat(actor, results);
-    results = ``;
+    generateChat(actor, results)
+    results = ``
   }
 
   // used to create the chat messages
   async function generateChat(actor, output) {
     let chatData = {
-      user: game.user._id,
+      user: game.user.id,
       speaker: {
         alias: actor.name,
       },
       content: output,
-    };
-    await ChatMessage.create(chatData, {});
+    }
+    await ChatMessage.create(chatData, {})
   }
 
   // need to regenerate the dialog each time to keep bonuses persistent
   function runDialog() {
     let d = new Dialog({
-      title: "Skill Challenge",
+      title: 'Skill Challenge',
       content,
       buttons: {
         select: {
           icon: "<i class='fas fa-dice-d20'></i>",
-          label: "Roll",
+          label: 'Roll',
           callback: (html) => {
             //TODO: let bonuses = parseInt(html.find("#bonuses")[0].value);
-            let bonuses = 0;
-            if (html.find("#fastmode")[0].checked) {
-              fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort);
+            let bonuses = 0
+            if (html.find('#fastmode')[0].checked) {
+              fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort)
             } else {
-              normalMode(targetSuccesses, targetDC, actor, mod, bonuses, abort);
+              normalMode(targetSuccesses, targetDC, actor, mod, bonuses, abort)
             }
           },
         },
         cancel: {
           icon: "<i class='fas fa-lock-times'></i>",
-          label: "Cancel",
+          label: 'Cancel',
           callback: () => {
             if (attempts > 0) {
               if (successes === 1)
-                results += `Skill challenge interrupted after ${successes} success.`;
+                results += `Skill challenge interrupted after ${successes} success.`
               else
-                results = `Skill challenge interrupted after ${successes} successes.`;
-              generateChat(actor, results);
+                results = `Skill challenge interrupted after ${successes} successes.`
+              generateChat(actor, results)
             }
           },
         },
       },
-    });
-    d.options.width = 250;
-    d.position.width = 250;
-    d.render(true);
+    })
+    d.options.width = 250
+    d.position.width = 250
+    d.render(true)
   }
 
   // used to keep any entered bonuses peristent between re-renderings
   async function contentUpdate(bonuses) {
     //TO DO MANUAL BONUSES
-    content = `<div id="pf2e-rsc-scripts-content">
-    <!--
-        <label for="bonuses">Specific bonuses: </label>
-        <input type="text" id="bonuses" name="bonuses" value="${bonuses}"></br>
+    content = 
+    `<div id="pf2e-rsc-scripts-content">
+        <!--
+          <label for="bonuses">Specific bonuses: </label>
+            <input type="text" id="bonuses" name="bonuses" value="${bonuses}">
+          </br>
         -->
-        <label for="fastmode" style="display: inline-block; vertical-align: middle; position:relative">Autoroll?</label>
-        <input type="checkbox" name="fastmode" id="fastmode" style="position: relative; vertical-align:middle">
-        </br>
-        </div>`;
+          <label for="fastmode" style="display: inline-block; vertical-align: middle; position:relative">Autoroll?</label>
+            <input type="checkbox" name="fastmode" id="fastmode" style="position: relative; vertical-align:middle">
+          </br>
+    </div>`
   }
 
   // v9.0 roller
-  async function rollSkillCheck(skillKey) {
-    const whatSkill = token.actor.data.data.skills[skillKey];
+
+  async function rollSkillCheck(chosenSkill) {
+    const whatSkill = actor.skills[chosenSkill]
     let result = await game.pf2e.Check.roll(
-      new game.pf2e.CheckModifier("", whatSkill),
+      new game.pf2e.CheckModifier('', whatSkill),
       {
         actor,
-        type: "skill-check",
+        type: 'skill-check',
         createMessage: false,
         skipDialog: true,
-      }
-    );
-    return result;
+      },
+    )
+    return result
   }
 
-  async function rollSkillCheckBonus(skillKey) {
-    let bonusModifiers = [];
+  async function rollSkillCheckBonus(chosenSkill) {
+    let bonusModifiers = []
 
     const bonusModifier = new game.pf2e.Modifier(
-      "bonus",
+      'bonus',
       5,
-      game.pf2e.ModifierType.CIRCUMSTANCE
-    );
+      game.pf2e.ModifierType.CIRCUMSTANCE,
+    )
 
-    bonusModifiers.push(bonusModifier);
+    bonusModifiers.push(bonusModifier)
 
-    const whatSkill = token.actor.data.data.skills[skillKey];
+    const whatSkill = actor.skills[chosenSkill]
     let result = await game.pf2e.Check.roll(
-      new game.pf2e.CheckModifier("", whatSkill),
+      new game.pf2e.CheckModifier('', whatSkill),
       {
         actor,
-        type: "skill-check",
+        type: 'skill-check',
         modifiers: bonusModifier,
         createMessage: false,
         skipDialog: true,
-      }
-    );
-    return result;
+      },
+    )
+    return result
   }
 }
