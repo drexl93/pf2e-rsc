@@ -45,6 +45,7 @@ let content = ''
 let content2 = ''
 let abort
 let chosenSkill
+let mod
 
 content += 
 `<div id="pf2e-rsc-preset"><label for="preset">Pick a preset: </label>
@@ -61,9 +62,9 @@ content +=
 content += 
 `<div id="pf2e-rsc-chooseskill"><label for="chosenSkill">Choose a skill: </label>
 <select name="chosenSkill" id="chosenSkill">`
-  for (let i = 0; i < skills.length; i++) {
-    content += `<option value="${skills[i].toLowerCase()}">${
-      skills[i]
+  for (const element of skills) {
+    content += `<option value="${element.toLowerCase()}">${
+      element
     }</option>`
   }
 
@@ -102,6 +103,7 @@ let dialog = new Dialog({
         chosenSkill = html.find('#chosenSkill')[0].value
         let preset = html.find('#preset')[0].value
         let actorID = actor.id
+        mod = actor.skills[chosenSkill].mod;
         abort = html.find(`#yes`)[0].checked
         if (preset === 'custom') {
           custom.options.width = 125
@@ -115,6 +117,7 @@ let dialog = new Dialog({
             chosenSkill,
             abort,
             actorID,
+            mod
           })
         }
       },
@@ -136,6 +139,7 @@ let custom = new Dialog({
         let neededSuccesses = parseInt(html.find('#successes')[0].value)
         let DC = parseInt(html.find('#pf2e-rsc-customDC')[0].value)
         let actorID = actor.id
+        mod = actor.skills[chosenSkill].mod;
         game.socket.emit('module.pf2e-rsc', {
           operation: 'playerSkillChallenge',
           neededSuccesses,
@@ -143,6 +147,7 @@ let custom = new Dialog({
           chosenSkill,
           abort,
           actorID,
+          mod
         })
       },
     },
