@@ -19,7 +19,7 @@ export function skillChallenge(
   chosenSkill,
   abort,
   actorID,
-  mod,
+  mod
 ){
 
   console.log('targetSuccesses', targetSuccesses, 'targetDC', targetDC, 'chosenSkill', chosenSkill, 'abort', abort, 'actorID', actorID, 'mod', mod)
@@ -96,7 +96,7 @@ export function skillChallenge(
   }
 
   // if autoroll is checked, keep going until success or critical failure
-  async function fastMode(targetSuccesses, targetDC, bonuses, abort) {
+  async function fastMode(targetSuccesses, targetDC, actor, mod, bonuses, abort) {
     do {
       attempts++
       if (bonuses) {

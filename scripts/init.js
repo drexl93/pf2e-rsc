@@ -12,6 +12,7 @@ Hooks.once('ready', () => {
           data.chosenSkill,
           data.abort,
           data.actorID,
+          data.mod
         )
       }
     }
